@@ -1,4 +1,9 @@
 # main file for coding the game
+import random
+import time
+import sqlite3
+
+
 grid = [[0, 0, 0, 0, 0, 0, 0],
         [0, 0, 0, 0, 0, 0, 0],
         [0, 0, 0, 0, 0, 0, 0],
@@ -87,6 +92,10 @@ def checkForWins(playerID, row, column):
     # 45-degrees right
     if countPieces(playerID, row, column, 1, -1) == 4:
         winSequence(playerID)
+
+#This function should pick a column based on weights and randomness
+def ai():
+
 
 
 turnCounter = 0
