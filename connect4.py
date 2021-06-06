@@ -112,17 +112,20 @@ def checkForWins(playerID, row, column):
 
 #This function should pick a column based on weights and randomness
 def ai():
-    return
+    weights=[0,0,0,0,0,0,0]
+    available = possibleMoves()
+    choice = random.randInt(0,len(avaiable))
+    return avaiable[choice]
 
 
 #Find all the possible moves the Ai can go (i.e. all columns that are not full)
-#def possibleMoves():
-#    possibles = []
-#    for i in range(0,len(grid)):
+def possibleMoves():
+    possibles = []
+    for i in range(0,7):
+        if grid[0][i] == 0:
+            possibles.append(i)
+    return possibles
         
-
-    
-
 
 turnCounter = 0
 # game
