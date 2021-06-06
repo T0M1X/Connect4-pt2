@@ -13,6 +13,12 @@ grid = [[0, 0, 0, 0, 0, 0, 0],
         [0, 0, 0, 0, 0, 0, 0]]
 isGameRunning = True
 
+con=sqlite3.connect("Ai.db")
+c=con.cursor()
+c.execute("""CREATE TABLE IF NOT EXISTS
+states(state TEXT, moves TEXT,
+aw INTEGAR, bw INTEGAR, cw INTEGAR, dw INTEGAR,
+ew INTEGAR, fw INTEGAR, gw INTEGAR)""")
 
 def printGrid():
     for i in range(len(grid)):
@@ -122,7 +128,20 @@ def checkForWins(playerID, row, column):
 def ai():
     weights=[]
     available = possibleMoves()
+    availableString = ""
+    for i in range(0,len(available)):
+        availableString += str(available[i])
     numColumns = len(available)
+    currentState = ""
+    for i in range(0,6):
+        for j in range(0,7):
+            currentState += str(grid[i][j])
+    c.execute("SELECT aw FROM states WHERE state=?",
+              (currentState,))
+    if c.fetchall() == []:
+        c.execute("""INSERT INTO states(state,moves,aw,bw,cw,dw,ew,fw,gw)
+                    VALUES(?,?,0,0,0,0,0,0,0)""",
+                  (currentState,availableString))
     for i in range(0,numColumns):
          weights.append(1/numColumns)
     choice = np.random.choice(available,p=weights)
@@ -152,3 +171,6 @@ while isGameRunning:
         takeTurn(1)
 
     turnCounter += 1
+con.commit()
+c.close()
+con.close()
