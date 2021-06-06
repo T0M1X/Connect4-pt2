@@ -34,7 +34,16 @@ def placeCounter(playerID, column):
 
 
 def takeTurn(playerID):
-    column = int(input("Enter column: "))
+    valid = False
+    while valid == False:
+        try:
+            column = int(input("Enter column: "))
+            if column < 7 and column >= -1:
+                valid = True
+            else:
+                print("\nEnter a number between 0 and 6.\n")
+        except:
+            print("\nEnter a number you crackhead.\n")
     if isPossible(column):
         placeCounter(playerID, column)
 
@@ -95,7 +104,12 @@ def checkForWins(playerID, row, column):
 
 #This function should pick a column based on weights and randomness
 def ai():
+    return
 
+
+#Find all the possible moves the Ai can go (i.e. all columns that are not full)
+#def possibleMoves():
+    
 
 
 turnCounter = 0
