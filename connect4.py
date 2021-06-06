@@ -55,21 +55,20 @@ def countPieces(playerID, row, column, rowIncrement, columnIncrement):
     try:
         x = row
         y = column
-        while grid[x][y] == playerID:
+        while grid[x][y] == playerID and x >= 0 and y >= 0:
             if counter >= 4:
                 return 4
-
             counter += 1
             x += rowIncrement
             y += columnIncrement
 
         x = row - rowIncrement
         y = column - columnIncrement
-        while grid[x][y] == playerID:
+        while grid[x][y] == playerID  and x >= 0 and y >= 0:
             if counter >= 4:
                 return 4
-
             counter += 1
+            
             x -= rowIncrement
             y -= columnIncrement
 
@@ -87,21 +86,29 @@ def winSequence(playerID):
 
 
 def checkForWins(playerID, row, column):
-    # horizontal
-    if countPieces(playerID, row, column, 1, 0) == 4:
-        winSequence(playerID)
-
     # vertical
-    if countPieces(playerID, row, column, 0, -1) == 4:
+    if countPieces(playerID, row, column, 1, 0) == 4:
+        print("vertical win")
         winSequence(playerID)
+        return
+
+    # horizontal
+    if countPieces(playerID, row, column, 0, -1) == 4:
+        print("horizontal win")
+        winSequence(playerID)
+        return
 
     # 45-degrees left
     if countPieces(playerID, row, column, -1, -1) == 4:
+        print("diaganol left win")
         winSequence(playerID)
+        return
 
     # 45-degrees right
     if countPieces(playerID, row, column, 1, -1) == 4:
+        print("diaganol right win")
         winSequence(playerID)
+        return
 
 #This function should pick a column based on weights and randomness
 def ai():
