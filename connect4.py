@@ -28,6 +28,7 @@ def isPossible(column):
 def placeCounter(playerID, column):
     for i in range(0, len(grid)):
         if i + 1 >= len(grid) or grid[i + 1][column] != 0:
+            #if the loop isnt at the bottom or the next row has a counter inside
             grid[i][column] = playerID
             checkForWins(playerID, i, column)
             return
@@ -109,6 +110,10 @@ def ai():
 
 #Find all the possible moves the Ai can go (i.e. all columns that are not full)
 #def possibleMoves():
+#    possibles = []
+#    for i in range(0,len(grid)):
+        
+
     
 
 
