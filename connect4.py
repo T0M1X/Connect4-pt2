@@ -2,6 +2,7 @@
 import random
 import time
 import sqlite3
+import numpy as np
 
 
 grid = [[0, 0, 0, 0, 0, 0, 0],
@@ -119,9 +120,13 @@ def checkForWins(playerID, row, column):
 
 #This function should pick a column based on weights and randomness
 def ai():
-    weights=[0,0,0,0,0,0,0]
+    weights=[]
     available = possibleMoves()
-    choice = random.randint(0,len(available) -1)
+    numColumns = len(available)
+    for i in range(0,numColumns):
+         weights.append(1/numColumns)
+    choice = np.random.choice(available,p=weights)
+    print("I choose column "+str(choice))
     return available[choice]
 
 
