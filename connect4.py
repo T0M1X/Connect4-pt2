@@ -138,6 +138,8 @@ def ai():
             currentState += str(grid[i][j])
     c.execute("SELECT aw FROM states WHERE state=?",
               (currentState,))
+    #If this state is not in the database then this state
+    #will be inserted into the db.
     if c.fetchall() == []:
         c.execute("""INSERT INTO states(state,moves,aw,bw,cw,dw,ew,fw,gw)
                     VALUES(?,?,0,0,0,0,0,0,0)""",
