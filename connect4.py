@@ -16,9 +16,8 @@ isGameRunning = True
 con=sqlite3.connect("Ai.db")
 c=con.cursor()
 c.execute("""CREATE TABLE IF NOT EXISTS
-states(state TEXT, moves TEXT,
-aw INTEGAR, bw INTEGAR, cw INTEGAR, dw INTEGAR,
-ew INTEGAR, fw INTEGAR, gw INTEGAR)""")
+states(state TEXT, aw INTEGAR, bw INTEGAR, cw INTEGAR,
+dw INTEGAR, ew INTEGAR, fw INTEGAR, gw INTEGAR)""")
 
 def printGrid():
     for i in range(len(grid)):
@@ -128,9 +127,6 @@ def checkForWins(playerID, row, column):
 def ai():
     weights=[]
     available = possibleMoves()
-    availableString = ""
-    for i in range(0,len(available)):
-        availableString += str(available[i])
     numColumns = len(available)
     currentState = ""
     for i in range(0,6):
@@ -141,15 +137,32 @@ def ai():
     #If this state is not in the database then this state
     #will be inserted into the db.
     if c.fetchall() == []:
-        c.execute("""INSERT INTO states(state,moves,aw,bw,cw,dw,ew,fw,gw)
-                    VALUES(?,?,0,0,0,0,0,0,0)""",
-                  (currentState,availableString))
+        c.execute("""INSERT INTO states(state,aw,bw,cw,dw,ew,fw,gw)
+                    VALUES(?,0,0,0,0,0,0,0)""",
+                  (currentState,))
     for i in range(0,numColumns):
          weights.append(1/numColumns)
     choice = np.random.choice(available,p=weights)
     print("I choose column "+str(choice))
     return available[choice]
 
+
+#Returns an array of the weights for that state
+def getWeights(state):
+    weights=[]
+    c.execute("SELECT aw,bw,cw,dw,ew,fw,gw FROM states WHERE state=?",
+              (state,))
+    allWeights=c.fetchall()
+    for i in range(0,6):
+        weights.append(allWeights[0][i])
+    return weights
+    
+
+def pickColumn(moves,weights):
+    numMoves=len(moves)
+    
+    
+    
 
 #Find all the possible moves the Ai can go (i.e. all columns that are not full)
 def possibleMoves():
