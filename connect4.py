@@ -125,7 +125,7 @@ def checkForWins(playerID, row, column):
 
 #This function should pick a column based on weights and randomness
 def ai():
-    weights=[]
+    inverse=[]
     available = possibleMoves()
     numColumns = len(available)
     currentState = ""
@@ -141,8 +141,8 @@ def ai():
                     VALUES(?,0,0,0,0,0,0,0)""",
                   (currentState,))
     for i in range(0,numColumns):
-         weights.append(1/numColumns)
-    choice = np.random.choice(available,p=weights)
+         inverse.append(1/numColumns)
+    choice = pickColumn(available,getWeights(currentState),inverse)
     print("I choose column "+str(choice))
     return available[choice]
 
@@ -153,13 +153,20 @@ def getWeights(state):
     c.execute("SELECT aw,bw,cw,dw,ew,fw,gw FROM states WHERE state=?",
               (state,))
     allWeights=c.fetchall()
-    for i in range(0,6):
+    for i in range(0,7):
         weights.append(allWeights[0][i])
     return weights
     
-
-def pickColumn(moves,weights):
-    numMoves=len(moves)
+#This function will pick the column and takes in account weights from
+#the database and also the number of available columns there are.
+def pickColumn(moves,weights,probabilities):
+    finalWeights=[]
+    for i in range(0,len(moves)):
+        finalWeights.append(weights[moves[i]])
+    for i in range(0,len(probabilities)):
+        probabilities[i] += finalWeights[i]
+    choice = np.random.choice(moves,p=probabilities)
+    return choice
     
     
     
