@@ -50,6 +50,11 @@ def isAIorPlayer(playerID):
             return "AI"
         else:
             return "human"
+    elif gameMode == 3:
+        if playerID == 1:
+            return "AI"
+        else:
+            return "human"
     else:
         return "AI"
 
@@ -207,7 +212,8 @@ def possibleMoves():
 
 print("1 - Player vs. Player \n "
       "2 - Player vs. AI \n"
-      "3 - AI vs. AI")
+      "3 - AI vs. Player \n"
+      "4 - AI vs. AI")
 gameMode = int(input("Enter game mode: "))  # TODO validation checks
 
 
