@@ -4,7 +4,6 @@ import time
 import sqlite3
 import numpy as np
 
-
 grid = [[0, 0, 0, 0, 0, 0, 0],
         [0, 0, 0, 0, 0, 0, 0],
         [0, 0, 0, 0, 0, 0, 0],
@@ -13,11 +12,12 @@ grid = [[0, 0, 0, 0, 0, 0, 0],
         [0, 0, 0, 0, 0, 0, 0]]
 isGameRunning = True
 
-con=sqlite3.connect("Ai.db")
-c=con.cursor()
+con = sqlite3.connect("Ai.db")
+c = con.cursor()
 c.execute("""CREATE TABLE IF NOT EXISTS
 states(state TEXT, aw INTEGAR, bw INTEGAR, cw INTEGAR,
 dw INTEGAR, ew INTEGAR, fw INTEGAR, gw INTEGAR)""")
+
 
 def printGrid():
     for i in range(len(grid)):
@@ -34,7 +34,7 @@ def isPossible(column):
 def placeCounter(playerID, column):
     for i in range(0, len(grid)):
         if i + 1 >= len(grid) or grid[i + 1][column] != 0:
-            #if the loop isnt at the bottom or the next row has a counter inside
+            # if the loop isnt at the bottom or the next row has a counter inside
             grid[i][column] = playerID
             checkForWins(playerID, i, column)
             return
@@ -42,11 +42,11 @@ def placeCounter(playerID, column):
 
 def takeTurn(playerID):
     valid = False
-    
-    if playerID == 2: #Player 2 is now the ai
+
+    if playerID == 2:  # Player 2 is now the ai
         column = ai()
         valid = True
-    
+
     while valid == False:
         try:
             column = int(input("Enter column: "))
@@ -77,11 +77,11 @@ def countPieces(playerID, row, column, rowIncrement, columnIncrement):
 
         x = row - rowIncrement
         y = column - columnIncrement
-        while grid[x][y] == playerID  and x >= 0 and y >= 0:
+        while grid[x][y] == playerID and x >= 0 and y >= 0:
             if counter >= 4:
                 return 4
             counter += 1
-            
+
             x -= rowIncrement
             y -= columnIncrement
 
@@ -123,62 +123,62 @@ def checkForWins(playerID, row, column):
         winSequence(playerID)
         return
 
-#This function should pick a column based on weights and randomness
+
+# This function should pick a column based on weights and randomness
 def ai():
-    inverse=[]
+    inverse = []
     available = possibleMoves()
     numColumns = len(available)
     currentState = ""
-    for i in range(0,6):
-        for j in range(0,7):
+    for i in range(0, 6):
+        for j in range(0, 7):
             currentState += str(grid[i][j])
     c.execute("SELECT aw FROM states WHERE state=?",
               (currentState,))
-    #If this state is not in the database then this state
-    #will be inserted into the db.
+    # If this state is not in the database then this state
+    # will be inserted into the db.
     if c.fetchall() == []:
         c.execute("""INSERT INTO states(state,aw,bw,cw,dw,ew,fw,gw)
                     VALUES(?,0,0,0,0,0,0,0)""",
                   (currentState,))
-    for i in range(0,numColumns):
-         inverse.append(1/numColumns)
-    choice = pickColumn(available,getWeights(currentState),inverse)
-    print("I choose column "+str(choice))
+    for i in range(0, numColumns):
+        inverse.append(1 / numColumns)
+    choice = pickColumn(available, getWeights(currentState), inverse)
+    print("I choose column " + str(choice))
     return available[choice]
 
 
-#Returns an array of the weights for that state
+# Returns an array of the weights for that state
 def getWeights(state):
-    weights=[]
+    weights = []
     c.execute("SELECT aw,bw,cw,dw,ew,fw,gw FROM states WHERE state=?",
               (state,))
-    allWeights=c.fetchall()
-    for i in range(0,7):
+    allWeights = c.fetchall()
+    for i in range(0, 7):
         weights.append(allWeights[0][i])
     return weights
-    
-#This function will pick the column and takes in account weights from
-#the database and also the number of available columns there are.
-def pickColumn(moves,weights,probabilities):
-    finalWeights=[]
-    for i in range(0,len(moves)):
-        finalWeights.append(weights[moves[i]])
-    for i in range(0,len(probabilities)):
-        probabilities[i] += finalWeights[i]
-    choice = np.random.choice(moves,p=probabilities)
-    return choice
-    
-    
-    
 
-#Find all the possible moves the Ai can go (i.e. all columns that are not full)
+
+# This function will pick the column and takes in account weights from
+# the database and also the number of available columns there are.
+def pickColumn(moves, weights, probabilities):
+    finalWeights = []
+    for i in range(0, len(moves)):
+        finalWeights.append(weights[moves[i]])
+    for i in range(0, len(probabilities)):
+        probabilities[i] += finalWeights[i]
+    choice = np.random.choice(moves, p=probabilities)
+    return choice
+
+
+# Find all the possible moves the Ai can go (i.e. all columns that are not full)
 def possibleMoves():
     possibles = []
-    for i in range(0,7):
+    for i in range(0, 7):
         if grid[0][i] == 0:
             possibles.append(i)
     return possibles
-        
+
 
 turnCounter = 0
 # game
