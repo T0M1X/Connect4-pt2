@@ -194,10 +194,11 @@ def getWeights(state):
 # the database and also the number of available columns there are.
 def pickColumn(moves, weights, probabilities):
     finalWeights = []
-    for i in range(0, len(moves)):
+    numProb = len(probabilities)
+    for i in range(0, numProb):
         finalWeights.append(weights[moves[i]])
-    for i in range(0, len(probabilities)):
-        probabilities[i] += finalWeights[i]
+    for i in range(0, numProb):
+        probabilities[i] += (finalWeights[i]/(numProb**2))
     choice = np.random.choice(moves, p=probabilities)
     return choice
 
