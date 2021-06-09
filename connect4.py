@@ -40,17 +40,26 @@ def placeCounter(playerID, column):
             return
 
 
+def isAIorPlayer(playerID):
+    global gameMode
+
+    if gameMode == 1:
+        return "human"
+    elif gameMode == 2:
+        if playerID == 2:
+            return "AI"
+        else:
+            return "human"
+    else:
+        return "AI"
+
+
 def takeTurn(playerID):
-    valid = False
+    if isAIorPlayer(playerID) == "human":
 
-    if playerID == 2:  # Player 2 is now the ai
-        column = ai()
-        valid = True
-
-    while valid == False:
         try:
             column = int(input("Enter column: "))
-            if column < 7 and column >= -1:
+            if 7 > column >= -1:
                 if isPossible(column):
                     valid = True
                 else:
@@ -59,6 +68,9 @@ def takeTurn(playerID):
                 print("\nEnter a number between 0 and 6.\n")
         except:
             print("\nEnter a number you crackhead.\n")
+    else:
+        column = ai()
+
     placeCounter(playerID, column)
 
 
@@ -98,6 +110,14 @@ def winSequence(playerID):
     isGameRunning = False
 
 
+def drawSequence():
+    global isGameRunning
+
+    printGrid()
+    print("Game drawn")
+    isGameRunning = False
+
+
 def checkForWins(playerID, row, column):
     # vertical
     if countPieces(playerID, row, column, 1, 0) == 4:
@@ -113,14 +133,19 @@ def checkForWins(playerID, row, column):
 
     # 45-degrees left
     if countPieces(playerID, row, column, -1, -1) == 4:
-        print("diaganol left win")
+        print("diagonal left win")
         winSequence(playerID)
         return
 
     # 45-degrees right
     if countPieces(playerID, row, column, 1, -1) == 4:
-        print("diaganol right win")
+        print("diagonal right win")
         winSequence(playerID)
+        return
+
+    # game drawn
+    if sum(x.count(0) for x in grid) == 0:
+        drawSequence()
         return
 
 
@@ -178,6 +203,12 @@ def possibleMoves():
         if grid[0][i] == 0:
             possibles.append(i)
     return possibles
+
+
+print("1 - Player vs. Player \n "
+      "2 - Player vs. AI \n"
+      "3 - AI vs. AI")
+gameMode = int(input("Enter game mode: "))  # TODO validation checks
 
 
 turnCounter = 0
