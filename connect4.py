@@ -50,15 +50,19 @@ def isAIorPlayer(playerID):
 def takeTurn(playerID):
     if isAIorPlayer(playerID) == "human":
 
-        try:
-            column = int(input("Enter column: "))
-            if 7 > column >= -1:
-                if not isPossible(column):
-                    print("That column is full!")
-            else:
-                print("\nEnter a number between 0 and 6.\n")
-        except:
-            print("\nEnter a number you crackhead.\n")
+        valid = False
+        while valid == False:
+            try:
+                column = int(input("Enter column: "))
+                if column < 7 and column >= -1:
+                    if isPossible(column):
+                        valid = True
+                    else:
+                        print("That column is full!")
+                else:
+                    print("\nEnter a number between 0 and 6.\n")
+            except:
+                print("\nEnter a number you crackhead.\n")
     else:
         column = ai()
 
@@ -101,7 +105,9 @@ def winSequence(playerID):
     print(playerID, " wins!!!")
     isGameRunning = False
 
-    decision = input("Rematch? y/n: ")  # TODO validation checks
+    decision = ""
+    while decision != "y" and decision != "n":
+        decision = input("Rematch? y/n: ")
     if decision == "n":
         isSessionFinished = True
 
@@ -114,7 +120,9 @@ def drawSequence():
     print("Game drawn")
     isGameRunning = False
 
-    decision = input("Rematch? y/n: ")  # TODO validation checks
+    decision = ""
+    while decision != "y" and decision != "n":
+        decision = input("Rematch? y/n: ")
     if decision == "n":
         isSessionFinished = True
 
@@ -159,6 +167,7 @@ def ai():
     for i in range(0, 6):
         for j in range(0, 7):
             currentState += str(grid[i][j])
+    usedStates.append(currentState)
     c.execute("SELECT aw FROM states WHERE state=?",
               (currentState,))
 
@@ -214,11 +223,17 @@ def possibleMoves():
 
 isSessionFinished = False
 
-print("1 - Player vs. Player \n "
+print("1 - Player vs. Player \n"
       "2 - Player vs. AI \n"
       "3 - AI vs. Player \n"
       "4 - AI vs. AI")
-gameMode = int(input("Enter game mode: "))  # TODO validation checks
+
+gameMode = 10
+while gameMode < 1 or gameMode > 4:
+    try:
+        gameMode = int(input("Enter game mode: "))
+    except:
+        print("\nEnter a number you crackhead.\n")
 
 while not isSessionFinished:
     grid = [[0, 0, 0, 0, 0, 0, 0],
@@ -228,6 +243,7 @@ while not isSessionFinished:
             [0, 0, 0, 0, 0, 0, 0],
             [0, 0, 0, 0, 0, 0, 0]]
     isGameRunning = True
+    usedStates = []
     con = sqlite3.connect("Ai.db")
     c = con.cursor()
     c.execute("""CREATE TABLE IF NOT EXISTS states(
