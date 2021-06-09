@@ -64,7 +64,7 @@ def takeTurn(playerID):
             except:
                 print("\nEnter a number you crackhead.\n")
     else:
-        column = ai()
+        column = ai(playerID)
 
     placeCounter(playerID, column)
 
@@ -104,6 +104,7 @@ def winSequence(playerID):
     printGrid()
     print(playerID, " wins!!!")
     isGameRunning = False
+    modifyWeights(playerID)
 
     decision = ""
     while decision != "y" and decision != "n":
@@ -126,6 +127,29 @@ def drawSequence():
     if decision == "n":
         isSessionFinished = True
 
+
+# This function will modify the weights for the Ai
+def modifyWeights(winner):
+    for i in range(0,len(usedStates[0])):
+        if usedStates[1][i] == winner:
+            c.execute("""SELECT aw,bw,cw,dw,ew,fw,gw FROM states
+                      WHERE state=?""",
+                      (usedStates[0][i],))
+            temp=c.fetchall()[0]
+            weights=[]
+            for j in range(0,len(temp)):
+                weights.append(temp[j])
+            for j in range(0,usedStates[2][i]):
+                if weights[j] > (0 - usedStates[2][i]):
+                    weights[j] -= 1
+                    weights[usedStates[3][i]] += 1
+            c.execute("""UPDATE states SET aw=?, bw=?, cw=?,
+            dw=?, ew=?, fw=?, gw=? WHERE state=?""",
+                              (weights[0],weights[1],weights[2],weights[3],
+                               weights[4],weights[5],weights[6],
+                               usedStates[0][i]))
+            con.commit()
+    
 
 def checkForWins(playerID, row, column):
     # vertical
@@ -159,7 +183,7 @@ def checkForWins(playerID, row, column):
 
 
 # This function should pick a column based on weights and randomness
-def ai():
+def ai(playerID):
     inverse = []
     available = possibleMoves()
     numColumns = len(available)
@@ -167,7 +191,9 @@ def ai():
     for i in range(0, 6):
         for j in range(0, 7):
             currentState += str(grid[i][j])
-    usedStates.append(currentState)
+    usedStates[0].append(currentState)
+    usedStates[1].append(playerID)
+    usedStates[2].append(numColumns)
     c.execute("SELECT aw FROM states WHERE state=?",
               (currentState,))
 
@@ -180,10 +206,10 @@ def ai():
                   (currentState,))
         con.commit()
         print("Record inserted successfully into table ", c.rowcount)
-
     for i in range(0, numColumns):
         inverse.append(1 / numColumns)
     choice = pickColumn(available, getWeights(currentState), inverse)
+    usedStates[3].append(choice)
     print("I choose column " + str(choice))
     return choice
 
@@ -243,7 +269,7 @@ while not isSessionFinished:
             [0, 0, 0, 0, 0, 0, 0],
             [0, 0, 0, 0, 0, 0, 0]]
     isGameRunning = True
-    usedStates = []
+    usedStates = [[],[],[],[]]
     con = sqlite3.connect("Ai.db")
     c = con.cursor()
     c.execute("""CREATE TABLE IF NOT EXISTS states(
