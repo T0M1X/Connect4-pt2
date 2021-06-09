@@ -2,6 +2,7 @@
 import random
 import time
 import sqlite3
+from os import getcwd
 
 import numpy as np
 
@@ -175,7 +176,7 @@ def ai():
         inverse.append(1 / numColumns)
     choice = pickColumn(available, getWeights(currentState), inverse)
     print("I choose column " + str(choice))
-    return available[choice]
+    return choice
 
 
 # Returns an array of the weights for that state
@@ -226,7 +227,7 @@ while not isSessionFinished:
             [0, 0, 0, 0, 0, 0, 0],
             [0, 0, 0, 0, 0, 0, 0]]
     isGameRunning = True
-    con = sqlite3.connect("Ai.db")  # TODO make this relative file path
+    con = sqlite3.connect("Ai.db")
     c = con.cursor()
     c.execute("""CREATE TABLE IF NOT EXISTS states(
         state text,
