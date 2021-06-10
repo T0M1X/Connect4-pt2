@@ -63,9 +63,31 @@ def takeTurn(playerID):
                     print("\nEnter a number between 0 and 6.\n")
             except:
                 print("\nEnter a number you crackhead.\n")
+        currentState=""
+        for i in range(0, 6):
+            for j in range(0, 7):
+                currentState += str(grid[i][j])
+        available = possibleMoves()
+        numColumns = len(available)
+        usedStates[0].append(currentState)
+        usedStates[1].append(playerID)
+        usedStates[2].append(numColumns)
+        usedStates[3].append(column)
+        c.execute("SELECT aw FROM states WHERE state=?",
+                  (currentState,))
+
+        # If this state is not in the database then this state
+        # will be inserted into the db.
+        if not c.fetchall():
+            print("\n \n \n \n ")
+            c.execute("""INSERT INTO states(state,aw,bw,cw,dw,ew,fw,gw)
+                        VALUES(?,0,0,0,0,0,0,0)""",
+                      (currentState,))
+            con.commit()
+            print("Record inserted successfully into table ", c.rowcount)
     else:
         column = ai(playerID)
-
+        
     placeCounter(playerID, column)
 
 
@@ -75,13 +97,14 @@ def countPieces(playerID, row, column, rowIncrement, columnIncrement):
     try:
         x = row
         y = column
+        print(0,x,y)
         while grid[x][y] == playerID and x >= 0 and y >= 0:
             if counter >= 4:
                 return 4
             counter += 1
             x += rowIncrement
             y += columnIncrement
-
+            print(counter,x,y)
         x = row - rowIncrement
         y = column - columnIncrement
         while grid[x][y] == playerID and x >= 0 and y >= 0:
@@ -91,7 +114,7 @@ def countPieces(playerID, row, column, rowIncrement, columnIncrement):
 
             x -= rowIncrement
             y -= columnIncrement
-
+            print(counter,x,y)
         return counter
     except:
         return counter
@@ -140,9 +163,27 @@ def modifyWeights(winner):
             for j in range(0,len(temp)):
                 weights.append(temp[j])
             for j in range(0,usedStates[2][i]):
-                if weights[j] > (0 - usedStates[2][i]):
+                if weights[j] > (0 - usedStates[2][i]**3):
                     weights[j] -= 1
                     weights[usedStates[3][i]] += 1
+            c.execute("""UPDATE states SET aw=?, bw=?, cw=?,
+            dw=?, ew=?, fw=?, gw=? WHERE state=?""",
+                              (weights[0],weights[1],weights[2],weights[3],
+                               weights[4],weights[5],weights[6],
+                               usedStates[0][i]))
+            con.commit()
+        else:
+            c.execute("""SELECT aw,bw,cw,dw,ew,fw,gw FROM states
+                      WHERE state=?""",
+                      (usedStates[0][i],))
+            temp=c.fetchall()[0]
+            weights=[]
+            for j in range(0,len(temp)):
+                weights.append(temp[j])
+            for j in range(0,usedStates[2][i]):
+                if weights[usedStates[3][i]] > (0 - usedStates[2][i]**3):
+                    weights[j] += 1
+                    weights[usedStates[3][i]] -= 1
             c.execute("""UPDATE states SET aw=?, bw=?, cw=?,
             dw=?, ew=?, fw=?, gw=? WHERE state=?""",
                               (weights[0],weights[1],weights[2],weights[3],
@@ -171,7 +212,7 @@ def checkForWins(playerID, row, column):
         return
 
     # 45-degrees right
-    if countPieces(playerID, row, column, 1, -1) == 4:
+    if countPieces(playerID, row, column, -1, 1) == 4:
         print("diagonal right win")
         winSequence(playerID)
         return
@@ -233,7 +274,7 @@ def pickColumn(moves, weights, probabilities):
     for i in range(0, numProb):
         finalWeights.append(weights[moves[i]])
     for i in range(0, numProb):
-        probabilities[i] += (finalWeights[i]/(numProb**2))
+        probabilities[i] += (finalWeights[i]/(numProb**4))
     choice = np.random.choice(moves, p=probabilities)
     return choice
 
